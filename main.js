@@ -3,7 +3,10 @@ const cors = require('cors')
 const app = express()
 const port = 3000 // "Radiofrekvens"
 
+var bodyParser = require('body-parser')
+app.use(bodyParser.json())
 app.use(cors())
+
 
 
 const employees = [{
@@ -51,8 +54,21 @@ app.put('/api/employees/:anvId',(req,res)=>{
 
 
 app.post('/api/employees',(req,res)=>{
+    const emp = {
+        name : req.body.name,
+        birthDate: req.body.birthDate,
+        hourlySalary: req.body.hourlySalary,
+        id:1000
+    }
+    employees.push(emp)
+
+    //console.log(req.body.name)
+    //req.body.name
+    //req.body.birthDate
+    //req.bodyhourlySalary.   
     // ta det som finnas i body skapa nytt objekt och lägg in i arrayen
     // returnera 201 Created
+    res.status(201).send('Created')
 });
 
 app.get('/api/employees',(req,res)=>{
