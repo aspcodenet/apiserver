@@ -44,12 +44,32 @@ app.get('/api/employees/:anvId',(req,res)=>{
 });
 
 app.delete('/api/employees/:anvId',(req,res)=>{
+    console.log(req.params.anvId)
+    let p = employees.find(employee=>employee.id == req.params.anvId)
+    // 404???
+    if(p == undefined){
+        res.status(404).send('Finns inte')
+    }
+    employees.splice(employees.indexOf(p),1)
+    res.status(204).send('')    
 });
 
 app.put('/api/employees/:anvId',(req,res)=>{
-    //updatera
+    //updatera - REPLACE HELA OBJEKTET
+    let p = employees.find(employee=>employee.id == req.params.anvId)
+    // 404???
+    if(p == undefined){
+        res.status(404).send('Finns inte')
+    }
+    p.birthDate = req.body.birthDate
+    p.name = req.body.name
+    p.hourlySalary = req.body.hourlySalary
+    res.status(204).send('Updated')
 });
 
+// app.patch('/api/employees/:anvId',(req,res)=>{
+//     //updatera
+// });
 
 
 function getNextId(){
