@@ -52,13 +52,20 @@ app.put('/api/employees/:anvId',(req,res)=>{
 
 
 
+function getNextId(){
+    let m = Math.max(...employees.map(employee => employee.id))
+    return m + 1
+}
+
+
+
 
 app.post('/api/employees',(req,res)=>{
     const emp = {
         name : req.body.name,
         birthDate: req.body.birthDate,
         hourlySalary: req.body.hourlySalary,
-        id:1000
+        id:getNextId()
     }
     employees.push(emp)
 
