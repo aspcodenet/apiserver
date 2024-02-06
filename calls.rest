@@ -2,26 +2,29 @@
 GET http://localhost:3000/api/employees
 
 ### Get single
-GET http://localhost:3000/api/employees/5
+GET http://localhost:3000/api/employees/c6c1d91f-a50d-498e-a180-a89c7a2802da
 
 ### Create new
 POST http://localhost:3000/api/employees
 Content-Type: application/json; charset=utf-8
 
 {
-  "name": "Josefine2",
+  "name": "Josefine",
   "birthDate": "2002-03-30T00:00:00.000Z",
-  "hourlySalary": 501
+  "hourlySalary": 501,
+  "employedAt": "2019-03-30T00:00:00.000Z"
 }
 
 ### UPDATE
-PUT http://localhost:3000/api/employees/5
+PUT http://localhost:3000/api/employees/c6c1d91f-a50d-498e-a180-a89c7a2802da
 Content-Type: application/json; charset=utf-8
 
 {
   "name": "Josefine2",
   "birthDate": "2002-03-30T00:00:00.000Z",
-  "hourlySalary": 51
+  "hourlySalary": 501,
+  "employedAt": "2019-03-30T00:00:00.000Z"
+
 }
 
 ### DELETE

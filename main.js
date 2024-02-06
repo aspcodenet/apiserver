@@ -3,91 +3,98 @@ const cors = require('cors')
 const app = express()
 const port = 3000 // "Radiofrekvens"
 
+
+const migrationhelper = require('./migrationhelper')
+
 var bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(cors())
 
+const { sequelize, Employee } = require('./models')
 
 
-const employees = [{
-    name: "Stefan",
-    birthDate:new Date('1972-08-03'),
-    id:1,
-    hourlySalary:100
-},{
-    name: "Oliver",
-    birthDate:new Date('2008-05-28'),
-    id:4,
-    hourlySalary:50
-},
-{
-    name: "Josefine",
-    birthDate:new Date('2002-03-30'),
-    id:3,
-    hourlySalary:50
-},
-{
-    name: "Fanny",
-    birthDate:new Date('2000-01-02'),
-    id:2,
-    hourlySalary:60
-}]
 
-app.get('/api/employees/:anvId',(req,res)=>{
-    console.log(req.params.anvId)
-    let p = employees.find(employee=>employee.id == req.params.anvId)
-    // 404???
-    if(p == undefined){
-        res.status(404).send('Finns inte')
-    }
-    res.json(p)
+
+
+app.get('/api/employees/:userId',async (req,res)=>{
+    console.log(req.params.userId)
+
+    try {
+        const user = await Employee.findOne({
+          where: { userId:req.params.userId }
+        })
+        let result = {
+            name:user.name,
+            birthDate:user.birthDate,
+            hourlySalary: user.hourlySalary,
+            userid:user.userId,
+            employedAt:user.employedAt
+        }
+        return res.json(result)
+      } catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: 'Something went wrong' })
+      }
+
+
 });
 
-app.delete('/api/employees/:anvId',(req,res)=>{
-    console.log(req.params.anvId)
-    let p = employees.find(employee=>employee.id == req.params.anvId)
-    // 404???
-    if(p == undefined){
-        res.status(404).send('Finns inte')
+app.delete('/api/employees/:anvId',async (req,res)=>{
+    const uuid = req.params.uuid
+    try {
+      const user = await Employee.findOne({ where: { userId:uuid } })
+  
+      await user.destroy()
+  
+      return res.json({ message: 'Employee deleted!' })
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ error: 'Something went wrong' })
     }
-    employees.splice(employees.indexOf(p),1)
-    res.status(204).send('')    
 });
 
-app.put('/api/employees/:anvId',(req,res)=>{
-    //updatera - REPLACE HELA OBJEKTET
-    let p = employees.find(employee=>employee.id == req.params.anvId)
-    // 404???
-    if(p == undefined){
-        res.status(404).send('Finns inte')
+app.put('/api/employees/:anvId',async (req,res)=>{
+    const uuid = req.params.anvId
+    const {name,birthDate,hourlySalary,employedAt} = req.body
+
+    try {
+
+        const user = await Employee.findOne({
+            where: { userId:uuid}
+          })
+  
+      user.name = name
+      user.birthDate = birthDate 
+      user.hourlySalary     = hourlySalary
+      user.employedAt = employedAt
+  
+      await user.save()
+  
+      return res.status(204).json({err:'ok'})
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json({ error: 'Something went wrong' })
     }
-    p.birthDate = req.body.birthDate
-    p.name = req.body.name
-    p.hourlySalary = req.body.hourlySalary
-    res.status(204).send('Updated')
+
 });
 
-// app.patch('/api/employees/:anvId',(req,res)=>{
-//     //updatera
-// });
+
+ 
 
 
-function getNextId(){
-    let m = Math.max(...employees.map(employee => employee.id))
-    return m + 1
-}
+app.post('/api/employees',async (req,res)=>{
+
+    const {name,birthDate,hourlySalary,employedAt} = req.body
+    try {
+        const user = await Employee.create({name, hourlySalary, birthDate, employedAt })
+    
+        return res.json(user)
+      } catch (err) {
+        console.log(err)
+        return res.status(500).json(err)
+      }
 
 
-
-
-app.post('/api/employees',(req,res)=>{
-    const emp = {
-        name : req.body.name,
-        birthDate: req.body.birthDate,
-        hourlySalary: req.body.hourlySalary,
-        id:getNextId()
-    }
-    employees.push(emp)
 
     //console.log(req.body.name)
     //req.body.name
@@ -98,14 +105,18 @@ app.post('/api/employees',(req,res)=>{
     res.status(201).send('Created')
 });
 
-app.get('/api/employees',(req,res)=>{
+app.get('/api/employees',async (req,res)=>{
+    let employees = await Employee.findAll()
     let result = employees.map(p=>({
-        id: p.id,
+        userid: p.userid,
         name: p.name
     }))
      res.json(result)
 });
-app.listen(port, () => {
+app.listen(port, async () => {
+    await migrationhelper.migrate()
+//    await sequelize.sync({alter:true})
+    await sequelize.authenticate()
     console.log(`Example app listening2 on port ${port}`)
 })
   
