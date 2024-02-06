@@ -10,7 +10,7 @@ var bodyParser = require('body-parser')
 app.use(bodyParser.json())
 app.use(cors())
 
-const { sequelize, Employee } = require('./models')
+const { sequelize, Employee, SalaryPayment } = require('./models')
 
 
 
@@ -23,12 +23,15 @@ app.get('/api/employees/:userId',async (req,res)=>{
         const user = await Employee.findOne({
           where: { userId:req.params.userId }
         })
+        console.log(user)
         let result = {
             name:user.name,
             birthDate:user.birthDate,
             hourlySalary: user.hourlySalary,
             userid:user.userId,
-            employedAt:user.employedAt
+            phone:user.phone,
+            employedAt:user.employedAt,
+            hej:user.salaryPayments
         }
         return res.json(result)
       } catch (err) {
@@ -113,8 +116,12 @@ app.get('/api/employees',async (req,res)=>{
     }))
      res.json(result)
 });
+
+
 app.listen(port, async () => {
-    await migrationhelper.migrate()
+    const a = await SalaryPayment.findOne({where:{id:1},include:'employee'})
+    console.log(a.employee)
+        await migrationhelper.migrate()
 //    await sequelize.sync({alter:true})
     await sequelize.authenticate()
     console.log(`Example app listening2 on port ${port}`)
